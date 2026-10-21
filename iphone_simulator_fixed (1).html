@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>iPhone Simulator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#111}
+body{background:#0b0b0e;display:flex;justify-content:center;align-items:center;min-height:100dvh;overflow:hidden}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.iphone-frame{width:100vw;height:100dvh;max-width:420px;max-height:880px;background:#000;position:relative;overflow:hidden;isolation:isolate}
+@media(min-width:440px){.iphone-frame{height:90dvh;border:10px solid #222;border-radius:46px;box-shadow:0 25px 60px #0008}}
+.wallpaper{background-color:#253047;background-image:linear-gradient(180deg,#17243a33,#10101d55),url("https://cdn.imagetourls.com/uploads/tyImg/16L0BC6TG.jpg");background-position:center;background-size:cover}
+.dynamic-island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:30px;background:#000;border-radius:22px;z-index:1000;pointer-events:none}
+.status-bar{position:absolute;top:0;left:0;right:0;height:42px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;color:#fff;font-size:14px;font-weight:700;z-index:999;pointer-events:none}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.active{display:flex}
+#lock-screen{z-index:10;justify-content:space-between;padding:60px 20px 42px;color:white;cursor:pointer}
+.lock-time{text-align:center;margin-top:20px;text-shadow:0 2px 12px #0007}
+.date{font-size:18px;font-weight:600}.clock{font-size:82px;font-weight:700;line-height:1.1;letter-spacing:-3px}
+.swipe-hint{align-self:center;background:#ffffff30;backdrop-filter:blur(15px);padding:11px 20px;border-radius:30px;font-size:13px}
+#passcode-screen{z-index:20;align-items:center;justify-content:center;color:white;background:#15192399;backdrop-filter:blur(28px)}
+.passcode-title{font-size:18px;margin-bottom:24px}.dots{display:flex;gap:18px;margin-bottom:38px}
+.dot{width:12px;height:12px;border:1.5px solid white;border-radius:50%}.dot.active{background:white}
+.keypad{display:grid;grid-template-columns:repeat(3,72px);gap:14px 22px}
+.key{height:72px;border:0;border-radius:50%;background:#ffffff30;color:white;font-size:27px}
+.key:active{background:#ffffff70}.key.empty{visibility:hidden}
+.passcode-error{height:22px;font-size:13px;color:#ffd1d1;margin-top:14px}
+#home-screen{z-index:5;padding:58px 16px 120px;overflow-y:auto;color:white}
+.widgets{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 24px}
+.widget{min-height:130px;padding:15px;border-radius:23px;background:#ffffff48;backdrop-filter:blur(22px);box-shadow:0 5px 18px #0002}
+.widget.calendar{background:#ffffffdf;color:#111}.widget.weather{background:#287fcecc}
+.app-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px 8px}
+.app-item{border:0;background:transparent;color:white;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.app-icon{width:60px;height:60px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:29px;box-shadow:0 5px 12px #0003;overflow:hidden}
+.app-label{font-size:11px;text-shadow:0 1px 4px #000;font-weight:500}
+.dock{position:absolute;bottom:18px;left:14px;right:14px;height:82px;border-radius:29px;background:#ffffff42;backdrop-filter:blur(28px);display:flex;justify-content:space-around;align-items:center;padding:0 8px}
+.dock .app-icon{width:55px;height:55px}
+.app-window{position:absolute;inset:0;background:#f7f7f9;z-index:100;display:none;flex-direction:column}
+.app-window.active{display:flex}
+.app-header{height:76px;flex-shrink:0;background:#f7f7f9;border-bottom:1px solid #ddd;display:flex;align-items:flex-end;padding:0 16px 12px;justify-content:space-between}
+.back-btn{border:0;background:none;color:#087cff;font-size:16px;min-width:65px;text-align:left}
+.header-title{font-weight:700;font-size:17px;text-align:center;flex:1}
+.header-right{min-width:65px;text-align:right;color:#087cff}
+.app-content{flex:1;overflow-y:auto;padding-bottom:24px}
+.chat-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #e7e7e9;background:white;text-align:left;width:100%;border-left:0;border-right:0;border-top:0}
+.chat-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;background:#ddd}
+.chat-info{flex:1;min-width:0}.chat-name{font-weight:650;font-size:16px}.chat-msg{color:#777;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
+.chat-room{position:absolute;inset:0;background:#e9e2d9;z-index:120;display:none;flex-direction:column}.chat-room.active{display:flex}
+.messages-area{flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;background-color:#e9e2d9}
+.msg-bubble{max-width:82%;padding:10px 13px;border-radius:16px;font-size:15px;line-height:1.4;box-shadow:0 1px 2px #0001;overflow-wrap:anywhere}
+.msg-in{background:white;align-self:flex-start;border-top-left-radius:4px}.msg-out{background:#d9fdd3;align-self:flex-end;border-top-right-radius:4px}
+.message-form{display:flex;gap:8px;padding:10px;background:#f7f7f7}.message-form input{flex:1;min-width:0;border:1px solid #ddd;border-radius:22px;padding:10px 14px;background:white}.message-form button{border:0;border-radius:50%;width:42px;height:42px;background:#18a058;color:white}
+.panel{padding:20px}.panel h2{font-size:25px;margin-bottom:14px}.panel p{color:#666;margin:8px 0 16px;line-height:1.4}
+.note-title,.note-body{width:100%;border:0;background:white;padding:14px;border-radius:12px;margin-bottom:12px;outline-color:#ffca28}.note-title{font-weight:700;font-size:20px}.note-body{min-height:220px;resize:vertical}
+.primary{background:#087cff;color:white;border:0;border-radius:12px;padding:12px 16px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px}.photo-tile{aspect-ratio:1;background:linear-gradient(135deg,#e7b5c8,#7287b9);display:flex;align-items:center;justify-content:center;font-size:34px;overflow:hidden}.photo-tile img{width:100%;height:100%;object-fit:cover}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:16px;background:white;border-bottom:1px solid #eee;gap:10px}.setting-row button{border:0;border-radius:9px;background:#087cff;color:white;padding:8px 10px}
+.mail-card{padding:16px;background:white;border-bottom:1px solid #eee}.mail-card strong{display:block;margin-bottom:5px}
+.home-indicator{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:120px;height:5px;background:#fff;border-radius:5px;z-index:200;mix-blend-mode:difference}
+.toast{position:absolute;z-index:300;bottom:45px;left:15%;right:15%;padding:10px 14px;background:#222e;color:white;text-align:center;border-radius:12px;font-size:13px;display:none}
+@media(max-height:700px){.keypad{gap:9px 18px}.key{height:60px}.clock{font-size:70px}.app-icon{width:54px;height:54px}}
+</style>
+</head>
+<body>
+<div class="iphone-frame">
+  <div class="dynamic-island"></div>
+  <div class="status-bar"><span id="status-clock">10:17</span><span>▮▮▮ 5G 🔋</span></div>
+
+  <section id="lock-screen" class="screen active wallpaper" aria-label="Layar terkunci">
+    <div class="lock-time"><div class="date" id="lock-date">Rabu, 21 Oktober</div><div class="clock" id="lock-clock">10:17</div></div>
+    <div class="swipe-hint">🔓 Ketuk layar untuk membuka</div>
+  </section>
+
+  <section id="passcode-screen" class="screen wallpaper">
+    <div class="passcode-title">Masukkan Passcode</div>
+    <div class="dots" aria-label="Jumlah digit passcode"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="keypad">
+      <button class="key" data-digit="1">1</button><button class="key" data-digit="2">2</button><button class="key" data-digit="3">3</button>
+      <button class="key" data-digit="4">4</button><button class="key" data-digit="5">5</button><button class="key" data-digit="6">6</button>
+      <button class="key" data-digit="7">7</button><button class="key" data-digit="8">8</button><button class="key" data-digit="9">9</button>
+      <button class="key empty" tabindex="-1" aria-hidden="true"></button><button class="key" data-digit="0">0</button><button class="key" id="delete-digit" aria-label="Hapus digit">⌫</button>
+    </div>
+    <div class="passcode-error" id="passcode-error">Masukkan 4 digit apa saja</div>
+  </section>
+
+  <section id="home-screen" class="screen wallpaper">
+    <div class="widgets">
+      <div class="widget calendar"><div style="color:#ff453a;font-size:12px;font-weight:800" id="widget-day">RABU</div><div style="font-size:36px;font-weight:750" id="widget-date">21</div><div style="font-size:12px;color:#555;margin-top:5px">• Belanja<br>• Cuci baju</div></div>
+      <div class="widget weather"><div style="font-size:12px;font-weight:600">Seoul 📍</div><div style="font-size:30px;font-weight:700;margin:4px 0">18°</div><div style="font-size:11px">Cerah berawan · Demo</div></div>
+    </div>
+    <div class="app-grid">
+      <button class="app-item" data-app="wa"><span class="app-icon" style="background:#25d366">💬</span><span class="app-label">WhatsApp</span></button>
+      <button class="app-item" data-app="instagram"><span class="app-icon" style="background:linear-gradient(45deg,#f09433,#bc1888)">📸</span><span class="app-label">Instagram</span></button>
+      <button class="app-item" data-app="notes"><span class="app-icon" style="background:#ffcc35">📝</span><span class="app-label">Catatan</span></button>
+      <button class="app-item" data-app="photos"><span class="app-icon" style="background:#fff">🌈</span><span class="app-label">Foto</span></button>
+      <button class="app-item" data-app="mail"><span class="app-icon" style="background:#1687ff">✉️</span><span class="app-label">Mail</span></button>
+      <button class="app-item" data-app="settings"><span class="app-icon" style="background:#8e8e93">⚙️</span><span class="app-label">Pengaturan</span></button>
+      <button class="app-item" data-app="safari"><span class="app-icon" style="background:#eaf6ff">🧭</span><span class="app-label">Safari</span></button>
+      <button class="app-item" data-app="clock"><span class="app-icon" style="background:#292929">🕒</span><span class="app-label">Jam</span></button>
+    </div>
+    <div class="dock">
+      <button class="app-item" data-app="wa" aria-label="WhatsApp"><span class="app-icon" style="background:#25d366">💬</span></button>
+      <button class="app-item" data-app="safari" aria-label="Safari"><span class="app-icon" style="background:#eaf6ff">🧭</span></button>
+      <button class="app-item" data-app="mail" aria-label="Mail"><span class="app-icon" style="background:#1687ff">✉️</span></button>
+      <button class="app-item" data-app="settings" aria-label="Pengaturan"><span class="app-icon" style="background:#8e8e93">⚙️</span></button>
+    </div>
+  </section>
+
+  <section id="app-window" class="app-window">
+    <header class="app-header"><button class="back-btn" id="home-button">‹ Home</button><div class="header-title" id="app-title">Aplikasi</div><div class="header-right" id="app-action"></div></header>
+    <div class="app-content" id="app-content"></div>
+  </section>
+
+  <section id="chat-room" class="chat-room">
+    <header class="app-header"><button class="back-btn" id="chat-back">‹ Chat</button><div class="header-title" id="chat-title">Nama</div><div class="header-right">•••</div></header>
+    <div class="messages-area" id="messages-container"></div>
+    <form class="message-form" id="message-form"><input id="message-input" placeholder="Ketik pesan" autocomplete="off" aria-label="Ketik pesan"><button type="submit" aria-label="Kirim">➤</button></form>
+  </section>
+  <div class="toast" id="toast"></div>
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const screens = ['lock-screen','passcode-screen','home-screen'];
+  let passcode = '';
+  let activeChat = null;
+  let currentApp = null;
+  let toastTimer;
+  const chats = [
+    {id:1,name:'Khaleed خالد♥️',avatar:'https://cdn.imagetourls.com/uploads/tyImg/11ykKAxuS.jpg',messages:[{sender:'me',text:'Miss you so much ;('},{sender:'them',text:'😂 لماذا أنت مضحكٌ جداً؟ ههه'},{sender:'them',text:'I will go to Indonesia later'},{sender:'me',text:'Really?'}]},
+    {id:2,name:'Mama',avatar:'https://cdn.imagetourls.com/uploads/tyImg/10vEOVoP3.jpg',messages:[{sender:'them',text:'Jangan lupa makan ya nak ✨'}]},
+    {id:3,name:'Sha',avatar:'https://cdn.imagetourls.com/uploads/tyImg/ySLC3vHY.jpg',messages:[{sender:'them',text:'be, jadi ngga?'}]},
+    {id:4,name:'sekawan-kawan 👥',avatar:'https://cdn.imagetourls.com/uploads/tyImg/17U45ZFUK.jpg',messages:[{sender:'them',text:'Jenna: wkwkwk'}]}
+  ];
+  const appNames = {wa:'WhatsApp',instagram:'Instagram',notes:'Catatan',photos:'Foto',mail:'Mail',settings:'Pengaturan',safari:'Safari',clock:'Jam'};
+  function showScreen(id){screens.forEach(s=>$(s).classList.toggle('active',s===id));}
+  function updateClock(){
+    const now=new Date();
+    const time=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false});
+    $('status-clock').textContent=time;$('lock-clock').textContent=time;
+    $('lock-date').textContent=now.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+    $('widget-day').textContent=now.toLocaleDateString('id-ID',{weekday:'short'}).replace('.','').toUpperCase();
+    $('widget-date').textContent=now.getDate();
+  }
+  updateClock();setInterval(updateClock,1000);
+  $('lock-screen').addEventListener('click',()=>{showScreen('passcode-screen');passcode='';updateDots();$('passcode-error').textContent='Masukkan 4 digit apa saja';});
+  function updateDots(){$$('.dot').forEach((d,i)=>d.classList.toggle('active',i<passcode.length));}
+  function $$(selector){return document.querySelectorAll(selector);}
+  function enterDigit(d){
+    if(passcode.length>=4)return;
+    passcode+=d;updateDots();
+    if(passcode.length===4){$('passcode-error').textContent='Membuka…';setTimeout(()=>{passcode='';updateDots();showScreen('home-screen');},180);}
+  }
+  $$('.key[data-digit]').forEach(b=>b.addEventListener('click',()=>enterDigit(b.dataset.digit)));
+  $('delete-digit').addEventListener('click',()=>{passcode=passcode.slice(0,-1);updateDots();$('passcode-error').textContent='Masukkan 4 digit apa saja';});
+  $$('.app-item[data-app]').forEach(b=>b.addEventListener('click',()=>openApp(b.dataset.app)));
+  $('home-button').addEventListener('click',closeApp);
+  function showToast(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',2200);}
+  function openApp(id){
+    currentApp=id;$('app-title').textContent=appNames[id]||'Aplikasi';$('app-action').textContent='';
+    $('app-window').classList.add('active');$('chat-room').classList.remove('active');
+    const content=$('app-content');
+    if(id==='wa'){renderChatList();return;}
+    if(id==='instagram'){
+      content.innerHTML=`<div class="panel"><h2>Instagram</h2><p>Simulasi tampilan Instagram — bukan akun atau layanan Instagram sungguhan.</p><div style="display:flex;gap:12px;align-items:center;margin:20px 0"><div style="font-size:38px">🧑🏻‍🎤</div><div><strong>your_daily_mood</strong><p style="margin:4px 0">little moments ✨</p></div></div><div class="photo-grid"><div class="photo-tile">🌷</div><div class="photo-tile">🌇</div><div class="photo-tile">☕</div><div class="photo-tile">🌸</div><div class="photo-tile">🎧</div><div class="photo-tile">🌙</div></div><button class="primary" id="like-post">♡ Suka</button></div>`;
+      $('like-post').addEventListener('click',e=>{e.currentTarget.textContent=e.currentTarget.textContent.includes('Suka')?'♥ Disukai':'♡ Suka';});return;
+    }
+    if(id==='notes'){
+      content.innerHTML=`<div class="panel"><h2>Catatan</h2><p>Catatan disimpan sementara di layar ini.</p><input id="note-title" class="note-title" placeholder="Judul catatan"><textarea id="note-body" class="note-body" placeholder="Tulis sesuatu…"></textarea><button class="primary" id="save-note">Simpan catatan</button><div id="saved-note" style="margin-top:18px"></div></div>`;
+      $('save-note').addEventListener('click',()=>{const title=$('note-title').value.trim()||'Tanpa Judul';const body=$('note-body').value.trim();$('saved-note').innerHTML=`<div class="mail-card"><strong>${escapeHtml(title)}</strong><div>${escapeHtml(body).replace(/\n/g,'<br>')||'<i>Catatan kosong</i>'}</div></div>`;showToast('Catatan ditampilkan');});return;
+    }
+    if(id==='photos'){
+      content.innerHTML=`<div class="panel"><h2>Foto</h2><p>Galeri contoh. Wallpaper juga bisa diganti dari Pengaturan.</p></div><div class="photo-grid"><div class="photo-tile">🌷</div><div class="photo-tile">🌇</div><div class="photo-tile">🌊</div><div class="photo-tile">🌸</div><div class="photo-tile">🌌</div><div class="photo-tile">☁️</div></div>`;return;
+    }
+    if(id==='mail'){
+      content.innerHTML=`<div class="mail-card"><strong>Selamat datang 👋</strong><span style="color:#777;font-size:12px">Dari: iPhone Simulator</span><p style="margin-top:10px">Ini adalah kotak masuk contoh untuk simulator.</p></div><div class="mail-card"><strong>Jangan lupa istirahat</strong><span style="color:#777;font-size:12px">Dari: Mama</span><p style="margin-top:10px">Semoga harimu menyenangkan ✨</p></div>`;return;
+    }
+    if(id==='settings'){
+      content.innerHTML=`<div class="panel"><h2>Pengaturan</h2><p>Personalisasi simulator iPhone kamu.</p></div><div class="setting-row"><span>Ganti wallpaper</span><button id="wallpaper-button">Pilih wallpaper</button></div><div class="setting-row"><span>Wallpaper default</span><button id="default-wallpaper">Pulihkan</button></div><div class="setting-row"><span>Layar kunci</span><span>Aktif</span></div><div class="setting-row"><span>Passcode demo</span><span>4 digit apa saja</span></div>`;
+      $('wallpaper-button').addEventListener('click',()=>{const urls=['https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=900&q=85','https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=900&q=85','https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=85'];const next=(Number(document.body.dataset.wallpaper||0)+1)%urls.length;document.body.dataset.wallpaper=next;$$('.wallpaper').forEach(el=>{el.style.backgroundImage=`linear-gradient(180deg,#17243a22,#10101d44),url("${urls[next]}")`;});showToast('Wallpaper berhasil diganti');});
+      $('default-wallpaper').addEventListener('click',()=>{$$('.wallpaper').forEach(el=>{el.style.backgroundImage='linear-gradient(180deg,#17243a33,#10101d55),url("https://cdn.imagetourls.com/uploads/tyImg/16L0BC6TG.jpg")';});document.body.dataset.wallpaper='0';showToast('Wallpaper default dipulihkan');});return;
+    }
+    if(id==='safari'){
+      content.innerHTML=`<div class="panel"><h2>Safari 🧭</h2><p>Masukkan alamat situs untuk membukanya di tab baru.</p><form id="site-form" style="display:flex;gap:8px"><input id="site-url" placeholder="https://example.com" style="min-width:0;flex:1;border:1px solid #ddd;border-radius:10px;padding:11px"><button class="primary">Buka</button></form></div>`;
+      $('site-form').addEventListener('submit',e=>{e.preventDefault();let url=$('site-url').value.trim();if(!url)return;if(!/^https?:\/\//i.test(url))url='https://'+url;try{const parsed=new URL(url);if(!['http:','https:'].includes(parsed.protocol))throw Error();window.open(parsed.href,'_blank','noopener');}catch{showToast('Alamat situs tidak valid');}});return;
+    }
+    if(id==='clock'){content.innerHTML=`<div class="panel" style="text-align:center;padding-top:60px"><div style="font-size:58px">🕒</div><h2 id="clock-app-time" style="font-size:48px;margin:20px 0">${new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false})}</h2><p>Waktu perangkat saat ini</p></div>`;return;}
+  }
+  function closeApp(){$('app-window').classList.remove('active');$('chat-room').classList.remove('active');currentApp=null;activeChat=null;}
+  function renderChatList(){
+    const c=$('app-content');
+    c.innerHTML=chats.map(chat=>`<button class="chat-item" data-chat="${chat.id}"><img class="chat-avatar" src="${chat.avatar}" alt="" onerror="this.style.visibility='hidden'"><span class="chat-info"><span class="chat-name">${escapeHtml(chat.name)}</span><span class="chat-msg">${escapeHtml(chat.messages[chat.messages.length-1].text)}</span></span></button>`).join('');
+    c.querySelectorAll('[data-chat]').forEach(b=>b.addEventListener('click',()=>openChat(Number(b.dataset.chat))));
+  }
+  function openChat(id){
+    activeChat=chats.find(c=>c.id===id);if(!activeChat)return;
+    $('chat-title').textContent=activeChat.name;renderMessages();$('chat-room').classList.add('active');
+  }
+  function renderMessages(){
+    $('messages-container').innerHTML=activeChat.messages.map(m=>`<div class="msg-bubble ${m.sender==='me'?'msg-out':'msg-in'}">${escapeHtml(m.text)}</div>`).join('');
+    $('messages-container').scrollTop=$('messages-container').scrollHeight;
+  }
+  $('chat-back').addEventListener('click',()=>{$('chat-room').classList.remove('active');activeChat=null;});
+  $('message-form').addEventListener('submit',e=>{
+    e.preventDefault();const input=$('message-input');const value=input.value.trim();if(!value||!activeChat)return;
+    activeChat.messages.push({sender:'me',text:value});input.value='';renderMessages();
+  });
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+})();
+</script>
+</body>
+</html>
